@@ -1,6 +1,4 @@
 using System;
-using Domain.Entities;
-using Domain.Entities;
 
 namespace Domain.Entities;
 
@@ -11,9 +9,11 @@ public class GameSessionResult
     public Guid GameSessionId { get; set; }
     public GameSession GameSession { get; set; }
 
-    public Guid UserId { get; set; }
+    public Guid? UserId { get; set; }
     public User User { get; set; }
 
-    public int Score { get; set; } 
+    public int Score { get; set; }
+    public string Color { get; set; }
+    public bool IsWinner { get; set; }
     public string Notes { get; set; }
 }

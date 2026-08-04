@@ -56,3 +56,11 @@ TestResult.xml
 nunit-*.xml
 
 .idea
+# IDE
+.vs/
+.idea/
+
+# Local databases
+*.db
+*.db-shm
+*.db-wal

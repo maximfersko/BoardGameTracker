@@ -1,6 +1,10 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+export const formatDate = (iso: string) => new Date(iso).toLocaleDateString("ru-RU");
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+export const toDateInput = (iso: string) => iso.slice(0, 10);
+
+export const getInitials = (name: string) =>
+  name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();

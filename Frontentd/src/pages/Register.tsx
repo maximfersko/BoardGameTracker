@@ -1,196 +1,93 @@
-
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-
-interface RegisterFormData {
-  email: string;
-  displayName: string;
-  password: string;
-  confirmPassword: string;
-}
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Container, Card, Form, Button, Alert } from "react-bootstrap";
+import { useAuth } from "../lib/auth";
 
 const Register = () => {
+  const { register } = useAuth();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const form = useForm<RegisterFormData>({
-    defaultValues: {
-      email: '',
-      displayName: '',
-      password: '',
-      confirmPassword: ''
-    }
-  });
-
-  const onSubmit = async (data: RegisterFormData) => {
-    if (data.password !== data.confirmPassword) {
-      toast.error("Пароли не совпадают");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (password !== confirmPassword) {
+      setError("Пароли не совпадают");
       return;
     }
-
-    setIsLoading(true);
-    
+    setLoading(true);
     try {
-      console.log('Регистрация пользователя:', {
-        email: data.email,
-        displayName: data.displayName,
-        registeredAt: new Date()
-      });
-      
-      toast.success("Регистрация успешна!");
-      navigate('/login');
-    } catch (error) {
-      toast.error("Ошибка при регистрации");
+      await register(email, displayName, password, confirmPassword);
+      navigate("/");
+    } catch (err: any) {
+      setError(err.message || "Ошибка регистрации");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Регистрация</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Создайте аккаунт для доступа к базе настольных игр
-          </p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Новый аккаунт</CardTitle>
-            <CardDescription>
-              Заполните все поля для создания аккаунта
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  rules={{
-                    required: "Email обязателен",
-                    pattern: {
-                      value: /\S+@\S+\.\S+/,
-                      message: "Некорректный email"
-                    }
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="email" 
-                          placeholder="your@email.com" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="displayName"
-                  rules={{
-                    required: "Имя пользователя обязательно",
-                    minLength: {
-                      value: 2,
-                      message: "Минимум 2 символа"
-                    }
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Имя пользователя</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="text" 
-                          placeholder="Ваше имя" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="password"
-                  rules={{
-                    required: "Пароль обязателен",
-                    minLength: {
-                      value: 6,
-                      message: "Минимум 6 символов"
-                    }
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Пароль</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="Введите пароль" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  rules={{
-                    required: "Подтверждение пароля обязательно"
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Подтвердите пароль</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="Повторите пароль" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Регистрация..." : "Зарегистрироваться"}
-                </Button>
-              </form>
-            </Form>
-
-            <div className="mt-4 text-center">
-              <p className="text-sm text-gray-600">
-                Уже есть аккаунт?{' '}
-                <Link to="/login" className="text-primary hover:underline">
-                  Войти
-                </Link>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: "100vh" }}>
+      <Card style={{ width: "100%", maxWidth: 420 }}>
+        <Card.Body className="p-4">
+          <h2 className="text-center mb-4">Регистрация</h2>
+          {error && <Alert variant="danger">{error}</Alert>}
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3" controlId="registerName">
+              <Form.Label>Имя пользователя</Form.Label>
+              <Form.Control
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Ваше имя"
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="registerEmail">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="registerPassword">
+              <Form.Label>Пароль</Form.Label>
+              <Form.Control
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Минимум 6 символов"
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="registerConfirm">
+              <Form.Label>Подтвердите пароль</Form.Label>
+              <Form.Control
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Повторите пароль"
+                required
+              />
+            </Form.Group>
+            <Button type="submit" variant="primary" className="w-100" disabled={loading}>
+              {loading ? "Регистрация..." : "Зарегистрироваться"}
+            </Button>
+          </Form>
+          <div className="text-center mt-3">
+            Уже есть аккаунт? <Link to="/login">Войти</Link>
+          </div>
+        </Card.Body>
+      </Card>
+    </Container>
   );
 };
 

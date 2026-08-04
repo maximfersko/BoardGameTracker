@@ -1,67 +1,21 @@
-﻿version: "3.8"
-
-services:
-  
-  mssql:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: "${DB_NAME}"
-    ports:
-      - "1433:1433"
-    environment:
-      SA_PASSWORD: "${SA_PASSWORD}"
-      ACCEPT_EULA: "${ACCEPT_EULA}"
-      MSSQL_PID: "${MSSQL_PID}"
-      DB_NAME: "${DB_NAME}"
-    volumes:
-      - mssql-data:/var/opt/mssql
-    healthcheck:
-      test: [ "CMD", "/opt/mssql-tools/bin/sqlcmd", "-U", "sa", "-P", "${SA_PASSWORD}", "-Q", "SELECT 1" ]
-      interval: 10s
-      retries: 12
-      timeout: 5s
-    restart: unless-stopped
-
-  migrations:
-    image: boardgamestracker:latest
-    command: >
-      sh -c "dotnet ef database update
-      --project Infrastructure/Infrastructure.csproj
-      --startup-project api/BoardGamesTrackerApi.dll
-      --connection 'Server=mssql;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;'"
-    depends_on:
-      mssql:
-        condition: service_healthy
-
+﻿services:
   api:
-    image: boardgamestracker:latest
-    command: ["dotnet", "api/BoardGamesTrackerApi.dll"]
+    build: ./Backend
+    container_name: bgt-api
     ports:
-      - "5000:80"
-    depends_on:
-      - migrations
+      - "5018:80"
     environment:
-      ConnectionStrings__DefaultConnection: "Server=mssql;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;"
-      ASPNETCORE_ENVIRONMENT: "Production"
+      ASPNETCORE_ENVIRONMENT: Development
+    volumes:
+      - bgt-db:/app/data
 
-  authorize:
-    image: boardgamestracker:latest
-    command: ["dotnet", "authorize/BoardGameTrackerAuthorizeApi.dll"]
+  front:
+    build: ./Frontentd
+    container_name: bgt-front
     ports:
-      - "5001:80"
+      - "8082:80"
     depends_on:
-      - migrations
-    environment:
-      ConnectionStrings__DefaultConnection: "Server=mssql;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;"
-      ASPNETCORE_ENVIRONMENT: "Production"
-
-  notification:
-    image: boardgamestracker:latest
-    command: ["dotnet", "notification/BoardGameTrackerNotificationService.dll"]
-    depends_on:
-      - migrations
-    environment:
-      ConnectionStrings__DefaultConnection: "Server=mssql;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;"
-      ASPNETCORE_ENVIRONMENT: "Production"
+      - api
 
 volumes:
-  mssql-data:
+  bgt-db:

@@ -1,132 +1,67 @@
-
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-
-interface LoginFormData {
-  email: string;
-  password: string;
-}
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Container, Card, Form, Button, Alert } from "react-bootstrap";
+import { useAuth } from "../lib/auth";
 
 const Login = () => {
+  const { login } = useAuth();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const form = useForm<LoginFormData>({
-    defaultValues: {
-      email: '',
-      password: ''
-    }
-  });
-
-  const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
-    
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
     try {
-      console.log('Вход пользователя:', data);
-      
-      toast.success("Вход выполнен успешно!");
-      navigate('/');
-    } catch (error) {
-      toast.error("Ошибка при входе");
+      await login(email, password);
+      navigate("/");
+    } catch (err: any) {
+      setError(err.message || "Ошибка входа");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Вход</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Войдите в свой аккаунт для доступа к базе настольных игр
-          </p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Добро пожаловать</CardTitle>
-            <CardDescription>
-              Введите свои данные для входа
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  rules={{
-                    required: "Email обязателен",
-                    pattern: {
-                      value: /\S+@\S+\.\S+/,
-                      message: "Некорректный email"
-                    }
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="email" 
-                          placeholder="your@email.com" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="password"
-                  rules={{
-                    required: "Пароль обязателен"
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Пароль</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="Введите пароль" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Вход..." : "Войти"}
-                </Button>
-              </form>
-            </Form>
-
-            <div className="mt-4 text-center">
-              <p className="text-sm text-gray-600">
-                Нет аккаунта?{' '}
-                <Link to="/register" className="text-primary hover:underline">
-                  Зарегистрироваться
-                </Link>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: "100vh" }}>
+      <Card style={{ width: "100%", maxWidth: 420 }}>
+        <Card.Body className="p-4">
+          <h2 className="text-center mb-4">Вход</h2>
+          {error && <Alert variant="danger">{error}</Alert>}
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3" controlId="loginEmail">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="loginPassword">
+              <Form.Label>Пароль</Form.Label>
+              <Form.Control
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Пароль"
+                required
+              />
+            </Form.Group>
+            <Button type="submit" variant="primary" className="w-100" disabled={loading}>
+              {loading ? "Вход..." : "Войти"}
+            </Button>
+          </Form>
+          <div className="text-center mt-3">
+            Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+          </div>
+        </Card.Body>
+      </Card>
+    </Container>
   );
 };
 

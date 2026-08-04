@@ -19,6 +19,8 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<CollectionItem> CollectionItems { get; set; }
     public DbSet<GameSession> GameSessions { get; set; }
     public DbSet<GameSessionResult> GameSessionResults { get; set; }
+    public DbSet<Rating> Ratings { get; set; }
+    public DbSet<GuestPlayer> GuestPlayers { get; set; }
     public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
