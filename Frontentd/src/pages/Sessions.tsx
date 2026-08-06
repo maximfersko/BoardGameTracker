@@ -174,6 +174,9 @@ const Sessions = () => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {games.length === 0 ? (
+            <p className="text-muted mb-0">Сначала добавьте игру, затем записывайте партии</p>
+          ) : (
           <Form onSubmit={handleSave}>
             <Row className="mb-3">
               <Col md={6}>
@@ -235,6 +238,7 @@ const Sessions = () => {
               {editingId ? "Сохранить изменения" : "Сохранить результат"}
             </Button>
           </Form>
+          )}
         </Modal.Body>
       </Modal>
 

@@ -88,7 +88,10 @@ const Games = () => {
       />
 
       {games.length === 0 ? (
-        <p className="text-muted">Игры не найдены</p>
+        <div className="text-center text-muted py-5">
+          <p className="fs-5 mb-1">В базе пока нет игр</p>
+          <p className="mb-0">Добавьте первую игру с помощью кнопки «Добавить игру»</p>
+        </div>
       ) : (
         <>
           <Row xs={1} md={2} lg={3} className="g-4">

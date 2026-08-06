@@ -21,7 +21,9 @@ const Collections = () => {
       .finally(() => setLoading(false));
   };
 
-  useEffect(loadCollections, []);
+  useEffect(() => {
+    loadCollections();
+  }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -15,7 +15,7 @@ public class RatingConfiguration : IEntityTypeConfiguration<Rating>
         builder.HasOne(r => r.Game)
             .WithMany()
             .HasForeignKey(r => r.GameId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(r => r.User)
             .WithMany()
